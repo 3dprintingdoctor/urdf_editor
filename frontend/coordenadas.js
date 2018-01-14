@@ -201,21 +201,21 @@ class URDF_joint {
   	// mensaje tipo "0.133333333333 0 -0.085"
   	if (xyz === undefined)
   		return;
-	let param = xyz.split(" ");
-	this.tx = Number(param[0]) * this.escala;
-	this.ty = Number(param[1]) * this.escala;
-	this.tz = Number(param[2]) * this.escala;
+  	let param = xyz.split(" ");
+  	this.tx = Number(param[0]) * this.escala;
+  	this.ty = Number(param[1]) * this.escala;
+  	this.tz = Number(param[2]) * this.escala;
   }
 
    extraerrotacion(rpy){
   	// mensaje tipo "0.133333333333 0 -0.085"
   	if (rpy === undefined)
   		return;
-	let param = rpy.split(" ");
-	this.rx = Number(param[0]);
-	this.ry = Number(param[1]);
-	this.rz = Number(param[2]);
-	//console.log("" + this.rx + ", " + this.ry + ", " + this.rz);
+  	let param = rpy.split(" ");
+  	this.rx = Number(param[0]);
+  	this.ry = Number(param[1]);
+  	this.rz = Number(param[2]);
+  	//console.log("" + this.rx + ", " + this.ry + ", " + this.rz);
    }
 
 }

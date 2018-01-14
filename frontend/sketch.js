@@ -1,14 +1,12 @@
-
-let anglex = 0;
-let angley = 0;
-let anglez = 0;
-let translatex = 0;
-let translatey = 0;
-let translatez = 0;
+// rosrun xacro xacro model.xacro > model.urdf
+let anglex, angley, anglez, translatex, translatey, translatez;
+let xml;
 let mdl;
 
 let links = {};
 let joints = {};
+
+let defaultrobot = 'r2d2.urdf';
 
 // DOM
 let ckverlinks, ckverjoints;
@@ -17,7 +15,7 @@ function preload() {
   // mdl = loadModel('mdl.obj');
   // mdl = loadModel('base.stl');
   // mdl = loadModel('structure.dae');
-  xml = loadXML('robot_entero.urdf');
+  xml = loadXML(defaultrobot);
 }
 
 function setup() {
@@ -25,44 +23,15 @@ function setup() {
 	c.drop(gotFile);
 
 	// DOM
-	let button1 = createButton('button1');
+	let button1 = createButton('Save urdf file');
 	// button1.position(screen.width * 0.7, canvasheight+20);
 	button1.mousePressed(funcbutton1);
-	ckverlinks = createCheckbox('Ver links');
+	ckverlinks = createCheckbox('Show links');
+  ckverlinks.attribute('checked', null);
  	// ckverlinks.position(20, 5);
- 	ckverjoints = createCheckbox('Ver joints');
-
-	for (let elem of xml.getChildren()){
-		if (elem.name == "link"){
-			let link = new URDF_link(elem);
-			//links.push(link);
-			//console.log(elem.attributes.name);
-			// cada link tiene un nombre unico, almacenarlos en un objeto clave valor
-			links[elem.attributes.name] = link;
-		}
-		else if (elem.name == "joint"){
-			let joint = new URDF_joint(elem);
-			joints[elem.attributes.name] = joint;
-		}
-	}
-	// añadir todos los joints a sus links correspondientes
-	// y sustituye nombres (parent y child) por los objetos link
-	for (let joint in joints) {
-		if (joints[joint].parent){
-			let parentname = joints[joint].parent
-			links[parentname].childjoints.push(joints[joint]);
-			joints[joint].parent = links[parentname];
-		}
-		if (joints[joint].child){
-			let childname = joints[joint].child
-			links[childname].parentjoints.push(joints[joint]);
-			joints[joint].child = links[childname];
-		}
-	}
-
-  anglex = PI + PI/2 + PI/6;
-  anglez = PI + PI/2 - PI/6;
-  translatez = 200;
+ 	ckverjoints = createCheckbox('Show joints');
+  createP("Drag and drop urdf files into the view")
+  loadnewURDF();
 }
 
 function draw() {
@@ -107,33 +76,28 @@ function mouseWheel(event) {
 
 //function doubleClicked() {
 function mouseClicked(){
-	if (mouseButton === RIGHT){
-		anglex = PI + PI/2 + PI/6;
-		angley = 0;
-		anglez = PI + PI/2 - PI/6;
-		translatex = 0;
-		translatey = 0;
-		translatez = 200;
-	}
-	loop();
+  if (mouseButton === RIGHT){
+    initialperspective();
+  }
+  loop();  // loop siempre para actualizar si se pulsan botones y checks
 }
 
 function funcbutton1(){
-	console.log("abre dialogo descargar archivo.txt como cam.json");
-	objeto = "archivo.txt";
-	downloadFile("archivo.txt",'cam','json')
+  // save(xml, 'temp.xml');
+  downloadFile(defaultrobot,'robot','urdf')
 }
 
 function gotFile(file) {
-  // file.type (xacro vacio) name size file (contenido)
-  console.log(file);
-  //loadXML(file, cargarxacro , cargarxacroerror)
-  file.data.getChildren('animal');
+  if (extraerextension(file.file.name) != 'urdf'){
+		alert("Only urdf files are supported");
+		return;
+	}
+  loadXML(file.data, cargarxacro , cargarxacroerror);
 }
 
 function cargarxacro(e) {
-	glob = e;
-	console.log(e);
+  xml = e;
+  loadnewURDF();
 }
 
 function cargarxacroerror(e) {
@@ -177,4 +141,52 @@ function drawbasecoord(){
 	 	cylinder(vectorweight, vectorlength);
 	pop();
 
+}
+
+function loadnewURDF(){
+  links = {};
+  joints = {};
+  for (let elem of xml.getChildren()){
+    if (elem.name == "link"){
+      let link = new URDF_link(elem);
+      //links.push(link);
+      //console.log(elem.attributes.name);
+      // cada link tiene un nombre unico, almacenarlos en un objeto clave valor
+      links[elem.attributes.name] = link;
+    }
+    else if (elem.name == "joint"){
+      let joint = new URDF_joint(elem);
+      joints[elem.attributes.name] = joint;
+    }
+  }
+  // añadir todos los joints a sus links correspondientes
+  // y sustituye nombres (parent y child) por los objetos link
+  for (let joint in joints) {
+    if (joints[joint].parent){
+      let parentname = joints[joint].parent
+      links[parentname].childjoints.push(joints[joint]);
+      joints[joint].parent = links[parentname];
+    }
+    if (joints[joint].child){
+      let childname = joints[joint].child
+      links[childname].parentjoints.push(joints[joint]);
+      joints[joint].child = links[childname];
+    }
+  }
+  initialperspective();
+  loop();
+}
+
+function initialperspective(){
+  anglex = PI + PI/2 + PI/6;
+  angley = 0;
+  anglez = PI + PI/2 - PI/6;
+  translatex = 0;
+  translatey = 0;
+  translatez = 200;
+}
+
+function extraerextension(archivo){
+	let partes = archivo.split('.');
+	return partes[partes.length-1].toLowerCase();
 }

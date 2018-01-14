@@ -19,18 +19,24 @@ function preload() {
 }
 
 function setup() {
-	var c = createCanvas(800, 600, WEBGL);
+	var c = createCanvas(windowWidth * 0.8, windowHeight * 0.9, WEBGL); // 800, 600
+  c.parent("canvasP");  // Atach to html canvas
 	c.drop(gotFile);
 
 	// DOM
-	let button1 = createButton('Save urdf file');
-	// button1.position(screen.width * 0.7, canvasheight+20);
-	button1.mousePressed(funcbutton1);
+  let rmargin = select('#rmargin');
 	ckverlinks = createCheckbox('Show links');
   ckverlinks.attribute('checked', null);
+  ckverlinks.parent(rmargin);
  	// ckverlinks.position(20, 5);
  	ckverjoints = createCheckbox('Show joints');
-  createP("Drag and drop urdf files into the view")
+  ckverjoints.parent(rmargin);
+  let button1 = createButton('Save urdf file');
+  button1.parent(rmargin);
+  // button1.position(screen.width * 0.7, canvasheight+20);
+  button1.mousePressed(funcbutton1);
+  let text = createP("Drag and drop urdf files into the view")
+  text.parent(rmargin);
   loadnewURDF();
 }
 
